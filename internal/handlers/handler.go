@@ -222,10 +222,12 @@ func (h *Handler) OauthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
     // Use FE redirect URL from environment variable
     feRedirectURL := os.Getenv("FE_REDIRECT_URL")
+    log.Println("FE_REDIRECT_URL:", feRedirectURL)
     if feRedirectURL == "" {
         feRedirectURL = "http://syra.insec.my.id/auth/callback"
     }
     redirectURL := feRedirectURL + "?token=" + token.AccessToken
+    log.Println("Redirecting to:", redirectURL)
     http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }
 

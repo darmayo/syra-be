@@ -22,6 +22,7 @@ func (s *Service) PerformAction() error {
 
 // FetchAlerts returns alerts only for domains owned by the given user, matching agent_name to domain name.
 func (s *Service) FetchAlerts(userID int) ([]map[string]interface{}, error) {
+    alerts := make([]map[string]interface{}, 0) // ensures [] not null
     query := `
         SELECT a.id, a.severity, a.pretext, a.title, a."text", a.rule_id, a."timestamp", a.agent_id, a.agent_name, a.agent_ip, a.manager_name, a.full_log, a.decoder_name, a.protocol, a.srcip, a.url, a.status_code, a."location", a.raw_data
         FROM public.alerts a
@@ -37,7 +38,6 @@ func (s *Service) FetchAlerts(userID int) ([]map[string]interface{}, error) {
     }
     defer rows.Close()
 
-    var alerts []map[string]interface{}
     for rows.Next() {
         var alert = make(map[string]interface{})
         var (

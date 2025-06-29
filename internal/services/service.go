@@ -20,14 +20,17 @@ func (s *Service) PerformAction() error {
     return nil
 }
 
-func (s *Service) FetchAlerts() ([]map[string]interface{}, error) {
+// FetchAlerts returns alerts only for domains owned by the given user, matching agent_name to domain name.
+func (s *Service) FetchAlerts(userID int) ([]map[string]interface{}, error) {
     query := `
-        SELECT id, severity, pretext, title, "text", rule_id, "timestamp", agent_id, agent_name, agent_ip, manager_name, full_log, decoder_name, protocol, srcip, url, status_code, "location", raw_data
-        FROM public.alerts
-        ORDER BY "timestamp" DESC;
+        SELECT a.id, a.severity, a.pretext, a.title, a."text", a.rule_id, a."timestamp", a.agent_id, a.agent_name, a.agent_ip, a.manager_name, a.full_log, a.decoder_name, a.protocol, a.srcip, a.url, a.status_code, a."location", a.raw_data
+        FROM public.alerts a
+        JOIN domain d ON a.agent_name = d.name
+        WHERE d.user_id = $1
+        ORDER BY a."timestamp" DESC;
     `
 
-    rows, err := s.DB.Query(query)
+    rows, err := s.DB.Query(query, userID)
     if err != nil {
         log.Printf("Error executing query: %v", err)
         return nil, err

@@ -36,7 +36,29 @@ type AddDomainResponse struct {
 }
 
 func (h *Handler) FetchAlert(w http.ResponseWriter, r *http.Request) {
-    alerts, err := h.Service.FetchAlerts()
+    authHeader := r.Header.Get("Authorization")
+    if !strings.HasPrefix(authHeader, "Bearer ") {
+        http.Error(w, "Unauthorized", http.StatusUnauthorized)
+        return
+    }
+    token := strings.TrimPrefix(authHeader, "Bearer ")
+    userInfo, err := GetUserFromGoogleToken(token)
+    if err != nil {
+        http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
+        return
+    }
+    user, err := h.Service.GetUserByEmail(userInfo.Email)
+    if err != nil {
+        http.Error(w, "User not found", http.StatusUnauthorized)
+        return
+    }
+    userID, ok := user["id"].(int)
+    if !ok {
+        http.Error(w, "Invalid user ID", http.StatusInternalServerError)
+        return
+    }
+
+    alerts, err := h.Service.FetchAlerts(userID)
     if err != nil {
         http.Error(w, "Failed to fetch alerts", http.StatusInternalServerError)
         return

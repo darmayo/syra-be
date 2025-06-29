@@ -247,7 +247,7 @@ func (h *Handler) OauthCallbackHandler(w http.ResponseWriter, r *http.Request) {
     feRedirectURL := os.Getenv("FE_REDIRECT_URL")
     log.Println("FE_REDIRECT_URL:", feRedirectURL)
     if feRedirectURL == "" {
-        feRedirectURL = "http://syra.insec.my.id/auth/callback"
+        feRedirectURL = "https://syra.insec.my.id/auth/callback"
     }
     redirectURL := feRedirectURL + "?token=" + token.AccessToken
     log.Println("Redirecting to:", redirectURL)
